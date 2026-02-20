@@ -184,7 +184,7 @@ if prix_demain:
     st.subheader("Graphique de demain")
     afficher_graphique_barres(df_demain)
 else:
-    st.info("🕒 Les tarifs de demain seront disponibles après 14h15.")
+    st.info("🕒 Les tarifs de demain seront disponibles après 13h10.")
 
 # --- PIED DE PAGE (FOOTER) ---
 st.write("") # Espace pour respirer
