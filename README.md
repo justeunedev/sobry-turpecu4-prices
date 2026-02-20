@@ -1,4 +1,4 @@
-# ⚡ Dashboard Élec Perso (CU4)
+# ⚡ Sobry Dashboard des prix TURPE CU4 (TTC)
 
 Une application Python/Streamlit conçue pour suivre en temps réel les prix dynamiques de l'électricité en France, en intégrant automatiquement les prix Spot, le TURPE (CU4) et toutes les taxes (TTC).
 Les données sont fournies par l'API publique du fournisseur d'électricité Sobry, afin d'être utiliser avec un de leur contrat.
