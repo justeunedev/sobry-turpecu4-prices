@@ -1,0 +1,45 @@
+name: Fetch Daily Prices
+
+# Trigger the workflow automatically every day, or manually
+on:
+  schedule:
+    - cron: '10 12 * * *' # 12:10 UTC (soit 13h10 heure de Paris en hiver)
+  workflow_dispatch:      # Ajoute un bouton "Run workflow" sur GitHub pour le lancer quand tu veux
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    # Donne explicitement le droit au robot d'écrire dans tes dossiers
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Execute data fetch script
+        run: python fetch_data.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # On ajoute uniquement le dossier data/ qui contient les JSON
+          git add data/
+          
+          # On valide les changements (s'il n'y a rien de nouveau, "exit 0" évite que le script plante)
+          git commit -m "⚡ Auto-update: Fetch tomorrow's prices & clean up" || exit 0
+          
+          # On synchronise avant de pousser pour éviter les erreurs de conflit
+          git pull --rebase origin main
+          git push
