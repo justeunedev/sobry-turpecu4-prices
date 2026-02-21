@@ -1,0 +1,53 @@
+name: Notifications Manager
+
+on:
+  schedule:
+    # --- CANAL HORAIRE ---
+    - cron: '45 * * * *' # Toutes les heures à la minute 45
+
+    # --- CANAL RECAPS (Heures UTC = Heure Paris Hiver - 1h) ---
+    - cron: '30 6 * * *'  # 07h30 Paris : Récap Matin
+    - cron: '30 11 * * *' # 12h30 Paris : Récap Midi
+    - cron: '15 12 * * *' # 13h15 Paris : Récap Demain
+    - cron: '30 15 * * *' # 16h30 Paris : Récap Soir
+    - cron: '30 20 * * *' # 21h30 Paris : Récap Nuit
+
+jobs:
+  run-notifications:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install requests
+
+      # On utilise la date UTC pour savoir quel job lancer
+      - name: Lancer la bonne notification
+        run: |
+          # Récupération de l'heure et des minutes UTC
+          HOUR=$(date -u +"%H")
+          MINUTE=$(date -u +"%M")
+          
+          echo "Il est $HOUR:$MINUTE en UTC."
+
+          # Les Recaps Précis
+          if [ "$HOUR" == "06" ] && [ "$MINUTE" == "30" ]; then
+            python notifier.py recap_matin
+          elif [ "$HOUR" == "11" ] && [ "$MINUTE" == "30" ]; then
+            python notifier.py recap_midi
+          elif [ "$HOUR" == "12" ] && [ "$MINUTE" == "15" ]; then
+            python notifier.py recap_demain
+          elif [ "$HOUR" == "15" ] && [ "$MINUTE" == "30" ]; then
+            python notifier.py recap_soir
+          elif [ "$HOUR" == "20" ] && [ "$MINUTE" == "30" ]; then
+            python notifier.py recap_nuit
+            
+          # Si on est à la minute 45, on lance la notif horaire
+          elif [ "$MINUTE" == "45" ]; then
+            python notifier.py hourly
+            # Et on vérifie si c'est aussi le moment pour la notif 3h (toutes les 3 heures)
+            if [ $(( (HOUR + 1) % 3 )) -eq 0 ]; then
+              python notifier.py 3h
+            fi
+          fi
